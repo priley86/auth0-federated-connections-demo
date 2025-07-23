@@ -11,7 +11,18 @@ https://github.com/user-attachments/assets/d0bef6c1-85bb-4e9c-9c9f-df68ce55ae7a
 
 ## Getting Started
 
-First, run the development server:
+Pre-reqs:
+You'll need all of the prerequisites mentioned in the original [quickstart](https://auth0.com/ai/docs/check-google-calendar-availability) on your Gen AI tenant. Once configured, setup a `.env` file here with your OpenAI key, e.g.:
+```
+AUTH0_SECRET='use [openssl rand -hex 32] to generate a 32 bytes value'
+APP_BASE_URL='http://localhost:3000'
+AUTH0_DOMAIN='<your-auth0-domain>'
+AUTH0_CLIENT_ID='<your-auth0-application-client-id>'
+AUTH0_CLIENT_SECRET='<your-auth0-application-client-secret>'
+OPENAI_API_KEY='<your-open-api-key>'
+```
+
+Then run the development server:
 
 ```bash
 npm run dev
