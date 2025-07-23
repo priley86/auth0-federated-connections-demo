@@ -11,7 +11,8 @@ https://github.com/user-attachments/assets/d0bef6c1-85bb-4e9c-9c9f-df68ce55ae7a
 
 ## Getting Started
 
-Pre-reqs:
+**Prerequisites**
+
 You'll need all of the prerequisites mentioned in the original [quickstart](https://auth0.com/ai/docs/check-google-calendar-availability) on your Gen AI tenant. Once configured, setup a `.env` file here with your OpenAI key, e.g.:
 ```
 AUTH0_SECRET='use [openssl rand -hex 32] to generate a 32 bytes value'
