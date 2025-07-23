@@ -1,4 +1,9 @@
+### auth0-federated-connections-demo
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+This a fork of the [Auth AI Calendar Availablity demo](https://auth0.com/ai/docs/check-google-calendar-availability), which demonstrates using federated access tokens to access a user's available calendars and nearby events.
+
 
 ## Getting Started
 

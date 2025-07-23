@@ -1,103 +1,100 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useUser } from "@auth0/nextjs-auth0";
+import { useChat } from "@ai-sdk/react";
+import { useInterruptions } from "@auth0/ai-vercel/react";
+import { FederatedConnectionInterrupt } from "@auth0/ai/interrupts";
+import { EnsureAPIAccessPopup } from "@/components/auth0-ai/FederatedConnections/popup";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+export default function Chat() {
+  const { messages, handleSubmit, input, setInput, toolInterrupt } =
+    useInterruptions((handler) =>
+      useChat({
+        onError: handler((error) => console.error("Chat error:", error)),
+      })
+    );
+
+  const { user, isLoading } = useUser();
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#222633] text-white font-sans font-medium">
+        Loading...
+      </div>
+    );
+
+  if (!user) {
+    return (
+      <main className="flex flex-col items-center justify-center h-screen bg-[#222633] p-10 gap-6 font-sans font-medium">
+        <a href="/auth/login?screen_hint=signup">
+          <button className="px-10 py-3 bg-[#EB5424] text-white rounded-md shadow-md hover:bg-[#d6471e] transition">
+            Sign up
+          </button>
+        </a>
+        <a href="/auth/login">
+          <button className="px-10 py-3 border-2 border-[#EB5424] text-[#EB5424] rounded-md shadow-md hover:bg-[#EB5424] hover:text-white transition">
+            Log in
+          </button>
+        </a>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
+    );
+  }
+
+  return (
+    <main className="flex flex-col h-screen max-w-3xl mx-auto bg-[#222633] text-white font-sans font-medium p-10">
+      {/* Header */}
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#3a3f59] pb-5 mb-6 bg-[#222633]">
+        <h1 className="text-2xl font-semibold">Welcome, {user.name}!</h1>
+        <a href="/auth/logout">
+          <button className="px-5 py-2 bg-[#EB5424] text-white rounded-md shadow hover:bg-[#d6471e] transition">
+            Log out
+          </button>
         </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+      </header>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto space-y-6 pb-6">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`max-w-[75%] px-6 py-4 rounded-xl shadow-md
+              ${
+                message.role === "user"
+                  ? "bg-white text-[#222633] self-end"
+                  : "bg-[#3a3f59] text-white self-start"
+              }
+              break-words
+            `}
+          >
+            <span className="font-semibold block mb-2 select-none text-sm uppercase tracking-wide">
+              {message.role === "user" ? "You" : "AI"}
+            </span>
+            <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
+          </div>
+        ))}
+
+        {FederatedConnectionInterrupt.isInterrupt(toolInterrupt) && (
+          <EnsureAPIAccessPopup
+            interrupt={toolInterrupt}
+            connectWidget={{
+              title: "Check your availability in Google Calendar",
+              description: "description ...",
+              action: { label: "Check" },
+            }}
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        )}
+      </div>
+
+      {/* Input */}
+      <form onSubmit={handleSubmit} className="sticky bottom-0 bg-[#222633] pt-5">
+        <input
+          value={input}
+          placeholder="Say something..."
+          onChange={(e) => setInput(e.target.value)}
+          className="w-full rounded-md border border-[#3a3f59] bg-[#2e324a] px-5 py-3 text-white placeholder:text-[#7f8498] shadow-md
+            focus:outline-none focus:ring-2 focus:ring-[#EB5424] transition"
+        />
+      </form>
+    </main>
   );
 }
